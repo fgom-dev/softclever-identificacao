@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int            @id @default(autoincrement())
+  nome          String         @db.VarChar(20)
+  sobrenome     String         @db.VarChar(50)
+  email         String         @unique(map: "email_UNIQUE") @db.VarChar(60)
+  senha         String         @db.VarChar(200)
+  celular       String         @unique(map: "celular_UNIQUE") @db.VarChar(11)
+  situacao      String         @default("1") @db.Char(1)
+  dhCriacao     DateTime       @default(now())
+  dhAtualizacao DateTime       @default(now())
+  UsuarioGrupo  UsuarioGrupo[]
+
+  @@map("usuarios")
+}
+
+model UsuarioGrupo {
+  id        Int     @id @default(autoincrement())
+  Usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  Grupo     Grupo   @relation(fields: [grupoId], references: [id])
+  grupoId   Int
+}
+
+model Grupo {
+  id           Int            @id @default(autoincrement())
+  descricao    String         @db.VarChar(150)
+  Empresa      Empresa?       @relation(fields: [empresaId], references: [id])
+  empresaId    Int?
+  UsuarioGrupo UsuarioGrupo[]
+}
+
+model Empresa {
+  id                Int        @id @default(autoincrement())
+  cnpj              String     @db.VarChar(14)
+  razaoSocial       String     @db.VarChar(150)
+  fantasia          String?    @db.VarChar(150)
+  regimeTributario  String     @db.Char(1)
+  inscricaoEstadual String     @db.VarChar(15)
+  situacao          String     @db.Char(1)
+  dhCriacao         DateTime   @default(now())
+  dhAtualizacao     DateTime   @default(now())
+  Enderecos         Endereco[]
+  Contatos          Contato[]
+  Grupos            Grupo[]
+
+  @@map("empresas")
+}
+
+model Endereco {
+  id            Int      @id @default(autoincrement())
+  descricao     String   @db.VarChar(250)
+  logradouro    String   @db.VarChar(250)
+  numero        String   @db.VarChar(20)
+  complemento   String?  @db.VarChar(250)
+  bairro        String   @db.VarChar(150)
+  municipio     String   @db.VarChar(150)
+  codMunicipio  String   @db.Char(7)
+  UF            String   @db.Char(2)
+  cep           String   @db.Char(8)
+  dhCriacao     DateTime @default(now())
+  dhAtualizacao DateTime @default(now())
+  situacao      String   @db.Char(1)
+  Empresa       Empresa? @relation(fields: [empresaId], references: [id])
+  empresaId     Int?
+
+  @@map("enderecos")
+}
+
+model Contato {
+  id        Int      @id @default(autoincrement())
+  descricao String   @db.VarChar(250)
+  contato   String   @db.VarChar(150)
+  situacao  String   @db.Char(1)
+  Empresa   Empresa? @relation(fields: [empresaId], references: [id])
+  empresaId Int?
+}
