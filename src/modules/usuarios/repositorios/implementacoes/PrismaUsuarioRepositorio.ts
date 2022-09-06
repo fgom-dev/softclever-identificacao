@@ -9,10 +9,7 @@ const usuarioParaRetorno = Prisma.validator<Prisma.UsuarioSelect>()({
 	id: true,
 	nome: true,
 	sobrenome: true,
-	email: true,
-	situacao: true,
-	dhCriacao: true,
-	dhAtualizacao: true,
+	email: true
 });
 
 export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
@@ -30,12 +27,13 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 					sobrenome,
 					email,
 					senha: await bcrypt.hash(senha, parseInt(process.env.SALT_ROUND as string)),
-					celular,
-					situacao: '1',
+					celular
 				},
 				select: usuarioParaRetorno
 			});
+
 			return usuario;
+
 		} catch (err) {
 			if (err instanceof Prisma.PrismaClientValidationError) {
 				throw new CustomError(400, 'Bad request');

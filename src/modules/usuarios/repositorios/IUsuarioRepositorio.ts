@@ -5,9 +5,9 @@ export interface IUsuarioParaRetorno {
 	nome: string;
 	sobrenome: string;
 	email: string;
-	situacao: string;
-	dhCriacao: Date;
-	dhAtualizacao: Date;
+	situacao?: string;
+	dhCriacao?: Date;
+	dhAtualizacao?: Date;
 }
 
 export interface IUsuarioCriacaoDTO {

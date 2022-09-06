@@ -1,12 +1,15 @@
 import { Router } from 'express';
-import { PrismaEmpresaRepositorio } from '../modules/empresas/repositorios/implementacoes/PrismaEmpresaRepositorio';
+
+import { autenticarUsuario } from '../middlewares/autenticarUsuario';
+import { criaEmpresaController } from '../modules/empresas/useCases/criaEmpresa';
+import { listarEmpresasController } from '../modules/empresas/useCases/listarEmpresas';
 
 export const empresasRoutes = Router();
 
-empresasRoutes.get('/', async (req, res) => {
-	const empresaRepositorio = new PrismaEmpresaRepositorio();
+empresasRoutes.post('/', autenticarUsuario, (req, res) => {
+	criaEmpresaController.handle(req, res);
+});
 
-	const empresas = await empresaRepositorio.listarEmpresas();
-
-	res.status(200).json(empresas);
+empresasRoutes.get('/', autenticarUsuario, (req, res) => {
+	listarEmpresasController.handle(req, res);
 });

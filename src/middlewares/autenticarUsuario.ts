@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
-export function autenticarUsuaio(req: Request, res: Response, next: NextFunction) {
+export function autenticarUsuario(req: Request, res: Response, next: NextFunction) {
 	const authToken = req.headers.authorization;
 
 	if (!authToken) {
@@ -13,9 +13,11 @@ export function autenticarUsuaio(req: Request, res: Response, next: NextFunction
 	const [, token] = authToken.split(' ');
 
 	try {
-		verify(token, process.env.SECRET as string, {
+		const jwt = verify(token, process.env.SECRET as string, {
 			complete: true
 		});
+
+		res.set({ 'usuarioId': jwt.payload.sub as string });
 
 		return next();
 	} catch (err) {

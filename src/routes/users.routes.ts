@@ -1,7 +1,6 @@
 import { Router } from 'express';
 
-import { autenticarUsuaio } from '../middlewares/autenticarUsuario';
-import { autorizarAtualizacaoUsuario } from '../middlewares/autorizarAtualizacaoUsuario';
+import { autenticarUsuario } from '../middlewares/autenticarUsuario';
 import { atualizarUsuarioController } from '../modules/usuarios/useCases/atualizarUsuario';
 import { criarUsuarioController } from '../modules/usuarios/useCases/criarUsuario';
 import { inativarUsuarioController } from '../modules/usuarios/useCases/inativarUsuario';
@@ -12,15 +11,15 @@ usersRoutes.post('/', (req, res) => {
 	return criarUsuarioController.handle(req, res);
 });
 
-usersRoutes.put('/:id', autorizarAtualizacaoUsuario, (req, res) => {
+usersRoutes.put('/:id', autenticarUsuario, (req, res) => {
 	return atualizarUsuarioController.handle(req, res);
 });
 
-usersRoutes.patch('/inativarUsuario/:id', autorizarAtualizacaoUsuario, (req, res) => {
+usersRoutes.patch('/inativarUsuario/:id', autenticarUsuario, (req, res) => {
 	return inativarUsuarioController.handle(req, res);
 });
 
-usersRoutes.get('/', autenticarUsuaio, (req, res) => {
+usersRoutes.get('/', autenticarUsuario, (req, res) => {
 	return res.status(200).json([
 		{ id: 1, name: 'Fernando' },
 		{ id: 2, name: 'Pamela' },

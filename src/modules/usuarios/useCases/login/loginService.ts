@@ -6,6 +6,7 @@ export class LoginService {
 	constructor(private usuarioRepositorio: IUsuarioRepositorio) { }
 
 	async execute({ email, senha }: IUsuarioLoginDTO): Promise<string> {
+
 		const usuario = await this.usuarioRepositorio.login({ email, senha });
 
 		const gerarTokenProvider = new GerarTokenProvider();
