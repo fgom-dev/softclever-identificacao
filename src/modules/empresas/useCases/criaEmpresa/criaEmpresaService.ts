@@ -7,6 +7,7 @@ export class CriaEmpresaService {
 
 	async execute(novaEmpresa: IEmpresaCriacaoDTO, usuarioId: number) {
 		const validaCnpj = new ValidarCnpj();
+
 		if (!validaCnpj.execute(novaEmpresa.cnpj)) {
 			throw new CustomError(400, 'CNPJ inválido');
 		}

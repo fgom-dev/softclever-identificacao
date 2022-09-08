@@ -5,21 +5,21 @@ import { atualizarUsuarioController } from '../modules/usuarios/useCases/atualiz
 import { criarUsuarioController } from '../modules/usuarios/useCases/criarUsuario';
 import { inativarUsuarioController } from '../modules/usuarios/useCases/inativarUsuario';
 
-export const usersRoutes = Router();
+export const usuariosRoutes = Router();
 
-usersRoutes.post('/', (req, res) => {
+usuariosRoutes.post('/', (req, res) => {
 	return criarUsuarioController.handle(req, res);
 });
 
-usersRoutes.put('/:id', autenticarUsuario, (req, res) => {
+usuariosRoutes.put('/:id', autenticarUsuario, (req, res) => {
 	return atualizarUsuarioController.handle(req, res);
 });
 
-usersRoutes.patch('/inativarUsuario/:id', autenticarUsuario, (req, res) => {
+usuariosRoutes.patch('/inativarUsuario/:id', autenticarUsuario, (req, res) => {
 	return inativarUsuarioController.handle(req, res);
 });
 
-usersRoutes.get('/', autenticarUsuario, (req, res) => {
+usuariosRoutes.get('/', autenticarUsuario, (req, res) => {
 	return res.status(200).json([
 		{ id: 1, name: 'Fernando' },
 		{ id: 2, name: 'Pamela' },

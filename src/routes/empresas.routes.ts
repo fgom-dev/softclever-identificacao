@@ -7,9 +7,9 @@ import { listarEmpresasController } from '../modules/empresas/useCases/listarEmp
 export const empresasRoutes = Router();
 
 empresasRoutes.post('/', autenticarUsuario, (req, res) => {
-	criaEmpresaController.handle(req, res);
+	return criaEmpresaController.handle(req, res);
 });
 
 empresasRoutes.get('/', autenticarUsuario, (req, res) => {
-	listarEmpresasController.handle(req, res);
+	return listarEmpresasController.handle(req, res);
 });
