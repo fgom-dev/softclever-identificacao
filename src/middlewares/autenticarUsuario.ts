@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { verify } from 'jsonwebtoken';
+import { JwtPayload, verify } from 'jsonwebtoken';
 
 export function autenticarUsuario(req: Request, res: Response, next: NextFunction) {
 	const authToken = req.headers.authorization;
@@ -17,7 +17,9 @@ export function autenticarUsuario(req: Request, res: Response, next: NextFunctio
 			complete: true
 		});
 
-		res.set({ 'usuarioId': jwt.payload.sub as string });
+		const payload = jwt.payload as JwtPayload;
+
+		res.set({ usuarioId: payload.usuarioId, empresaId: payload.empresaId });
 
 		return next();
 	} catch (err) {

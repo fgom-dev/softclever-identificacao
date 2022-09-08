@@ -34,5 +34,6 @@ export interface IEmpresaCriacaoDTO {
 
 export interface IEmpresaRepositorio {
 	criarEmpresa(novaEmpresa: IEmpresaCriacaoDTO, usuarioId: number): Promise<Empresa>
+	encontrarPeloCnpj(cnpj: string): Promise<Empresa | null>
 	listarEmpresas(usuarioId: number): Promise<Empresa[]>
 }

@@ -8,67 +8,62 @@ datasource db {
 }
 
 model Usuario {
-  id            Int            @id @default(autoincrement())
-  nome          String         @db.VarChar(20)
-  sobrenome     String         @db.VarChar(50)
-  email         String         @unique(map: "email_UNIQUE") @db.VarChar(60)
-  senha         String         @db.VarChar(200)
-  celular       String         @unique(map: "celular_UNIQUE") @db.VarChar(11)
-  situacao      String?        @default("1") @db.Char(1)
-  dhCriacao     DateTime?      @default(now())
-  dhAtualizacao DateTime?      @default(now())
-  UsuarioGrupo  UsuarioGrupo[]
+  id             Int              @id @default(autoincrement())
+  nome           String
+  sobrenome      String
+  email          String           @unique
+  senha          String
+  fone           String           @unique
+  admin          Boolean          @default(true)
+  situacao       String?          @default("1")
+  dhCriacao      DateTime?        @default(now())
+  dhAtualizacao  DateTime?        @default(now())
+  UsuarioEmpresa UsuarioEmpresa[]
 
   @@map("usuarios")
 }
 
-model UsuarioGrupo {
+model UsuarioEmpresa {
   id        Int     @id @default(autoincrement())
   Usuario   Usuario @relation(fields: [usuarioId], references: [id])
   usuarioId Int
-  Grupo     Grupo   @relation(fields: [grupoId], references: [id])
-  grupoId   Int
-}
+  Empresa   Empresa @relation(fields: [empresaId], references: [id])
+  empresaId Int
 
-model Grupo {
-  id           Int            @id @default(autoincrement())
-  descricao    String         @db.VarChar(150)
-  Empresa      Empresa?       @relation(fields: [empresaId], references: [id])
-  empresaId    Int?
-  UsuarioGrupo UsuarioGrupo[]
+  @@map("usuariosEmpresas")
 }
 
 model Empresa {
-  id                Int        @id @default(autoincrement())
-  cnpj              String     @db.VarChar(14)
-  razaoSocial       String     @db.VarChar(150)
-  fantasia          String?    @db.VarChar(150)
-  regimeTributario  String     @db.Char(1)
-  inscricaoEstadual String     @db.VarChar(15)
-  situacao          String?    @default("1") @db.Char(1)
-  dhCriacao         DateTime?  @default(now())
-  dhAtualizacao     DateTime?  @default(now())
+  id                Int              @id @default(autoincrement())
+  cnpj              String           @unique
+  razaoSocial       String
+  fantasia          String?
+  regimeTributario  String
+  inscricaoEstadual String
+  situacao          String?          @default("1")
+  dhCriacao         DateTime?        @default(now())
+  dhAtualizacao     DateTime?        @default(now())
   Enderecos         Endereco[]
   Contatos          Contato[]
-  Grupos            Grupo[]
+  UsuarioEmpresa    UsuarioEmpresa[]
 
   @@map("empresas")
 }
 
 model Endereco {
   id            Int       @id @default(autoincrement())
-  descricao     String    @db.VarChar(250)
-  logradouro    String    @db.VarChar(250)
-  numero        String    @db.VarChar(20)
-  complemento   String?   @db.VarChar(250)
-  bairro        String    @db.VarChar(150)
-  municipio     String    @db.VarChar(150)
-  codMunicipio  String    @db.Char(7)
-  UF            String    @db.Char(2)
-  cep           String    @db.Char(8)
+  descricao     String
+  logradouro    String
+  numero        String
+  complemento   String?
+  bairro        String
+  municipio     String
+  codMunicipio  String
+  UF            String
+  cep           String
   dhCriacao     DateTime? @default(now())
   dhAtualizacao DateTime? @default(now())
-  situacao      String?   @default("1") @db.Char(1)
+  situacao      String?   @default("1")
   Empresa       Empresa?  @relation(fields: [empresaId], references: [id])
   empresaId     Int?
 
@@ -77,9 +72,11 @@ model Endereco {
 
 model Contato {
   id        Int      @id @default(autoincrement())
-  descricao String   @db.VarChar(250)
-  contato   String   @db.VarChar(150)
-  situacao  String?  @default("1") @db.Char(1)
+  descricao String
+  contato   String
+  situacao  String?  @default("1")
   Empresa   Empresa? @relation(fields: [empresaId], references: [id])
   empresaId Int?
+
+  @@map("contatos")
 }

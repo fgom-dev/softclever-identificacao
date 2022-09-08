@@ -5,9 +5,13 @@ export class LoginController {
 	constructor(private loginService: LoginService) { }
 
 	async handle(req: Request, res: Response) {
-		const { email, senha } = req.headers;
+		const { cnpj, email, senha } = req.headers;
 
-		const token = await this.loginService.execute({ email: email as string, senha: senha as string });
+		const token = await this.loginService.execute({
+			cnpj: cnpj as string,
+			email: email as string,
+			senha: senha as string,
+		});
 
 		res.status(200).json({ token: token });
 	}

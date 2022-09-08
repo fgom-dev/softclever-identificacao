@@ -1,7 +1,7 @@
 import { PrismaClient, Usuario, Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { CustomError } from '../../../../Errors/CustomError';
-import { IUsuarioCriacaoDTO, IUsuarioLoginDTO, IUsuarioRepositorio, IUsuarioAtualizacaoDTO, IUsuarioParaRetorno } from '../IUsuarioRepositorio';
+import { IUsuarioCriacaoDTO, IUsuarioRepositorio, IUsuarioAtualizacaoDTO, IUsuarioParaRetorno } from '../IUsuarioRepositorio';
 
 const prisma = new PrismaClient();
 
@@ -13,8 +13,23 @@ const usuarioParaRetorno = Prisma.validator<Prisma.UsuarioSelect>()({
 });
 
 export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
-	async criarUsuario({ nome, sobrenome, email, senha, celular }: IUsuarioCriacaoDTO): Promise<IUsuarioParaRetorno> {
-		const usuarioJaExiste = await this.usuarioExiste(email, celular);
+	listarUsuariosPelaEmpresa(empresaId: number): Promise<IUsuarioParaRetorno[]> {
+		const usuarios = prisma.usuario.findMany({
+			where: {
+				UsuarioEmpresa: {
+					some: {
+						empresaId
+					}
+				}
+			},
+			select: usuarioParaRetorno
+		});
+
+		return usuarios;
+	}
+
+	async criarUsuario({ nome, sobrenome, email, senha, fone, empresaId }: IUsuarioCriacaoDTO): Promise<IUsuarioParaRetorno> {
+		const usuarioJaExiste = await this.usuarioExiste(email, fone);
 
 		if (usuarioJaExiste) {
 			throw new CustomError(409, 'Usuário já existe');
@@ -27,7 +42,13 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 					sobrenome,
 					email,
 					senha: await bcrypt.hash(senha, parseInt(process.env.SALT_ROUND as string)),
-					celular
+					fone,
+					admin: !empresaId,
+					UsuarioEmpresa: {
+						create: {
+							empresaId: empresaId ?? 0
+						}
+					}
 				},
 				select: usuarioParaRetorno
 			});
@@ -71,7 +92,7 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 		return usuario;
 	}
 
-	async usuarioExiste(email?: string, celular?: string): Promise<boolean> {
+	async usuarioExiste(email?: string, fone?: string): Promise<boolean> {
 		const usuarioCont = await prisma.usuario.count({
 			where: {
 				OR: [
@@ -81,8 +102,8 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 						}
 					},
 					{
-						celular: {
-							equals: celular,
+						fone: {
+							equals: fone,
 						}
 					}
 				]
@@ -127,23 +148,4 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 		return usuario;
 	}
 
-	async login({ email, senha }: IUsuarioLoginDTO): Promise<Usuario> {
-		try {
-			const usuario = await this.encontrarPeloEmail(email);
-
-			const match = await bcrypt.compare(senha, usuario.senha);
-
-			if (!match) {
-				throw new CustomError(403, 'Email ou senha incorretos');
-			}
-
-			return usuario;
-		} catch (err) {
-			if (err instanceof CustomError) {
-				throw new CustomError(403, 'Email ou senha incorretos');
-			}
-
-			throw err;
-		}
-	}
 }

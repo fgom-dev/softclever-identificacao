@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginController } from '../modules/usuarios/useCases/login';
+import { loginController } from '../modules/identificacao/useCases/login';
 
 export const loginRoutes = Router();
 

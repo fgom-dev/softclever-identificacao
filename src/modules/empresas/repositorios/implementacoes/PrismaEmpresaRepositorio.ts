@@ -4,6 +4,16 @@ import { IEmpresaCriacaoDTO, IEmpresaRepositorio } from '../IEmpresaRepositorio'
 const prisma = new PrismaClient();
 
 export class PrismaEmpresaRepositorio implements IEmpresaRepositorio {
+	async encontrarPeloCnpj(cnpj: string): Promise<Empresa | null> {
+		const empresa = await prisma.empresa.findUnique({
+			where: {
+				cnpj
+			}
+		});
+
+		return empresa;
+	}
+
 	async criarEmpresa(novaEmpresa: IEmpresaCriacaoDTO, usuarioId: number): Promise<Empresa> {
 		const empresa = await prisma.empresa.create({
 			data: {
@@ -22,14 +32,9 @@ export class PrismaEmpresaRepositorio implements IEmpresaRepositorio {
 						]
 					}
 				},
-				Grupos: {
+				UsuarioEmpresa: {
 					create: {
-						descricao: 'Supervisor',
-						UsuarioGrupo: {
-							create: {
-								usuarioId
-							}
-						}
+						usuarioId
 					}
 				}
 			}
@@ -41,13 +46,9 @@ export class PrismaEmpresaRepositorio implements IEmpresaRepositorio {
 	async listarEmpresas(usuarioId: number): Promise<Empresa[]> {
 		const empresas = await prisma.empresa.findMany({
 			where: {
-				Grupos: {
+				UsuarioEmpresa: {
 					some: {
-						UsuarioGrupo: {
-							some: {
-								usuarioId
-							}
-						}
+						usuarioId
 					}
 				}
 			}

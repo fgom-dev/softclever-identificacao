@@ -12,14 +12,12 @@ app.use(router);
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
 	if (error instanceof CustomError) {
 		res.status(error.statusCode).json({
-			status: 'Error',
-			message: error.message,
+			error: error.message,
 		});
 	}
 
 	return res.json({
-		status: 'Error',
-		message: error.message,
+		error: error.message,
 	});
 });
 
