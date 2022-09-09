@@ -21,6 +21,11 @@ export class CriarUsuarioService {
 			throw new CustomError(400, 'Telefone ou Celular inválido');
 		}
 
+		if ((await this.usuarioRepositorio.encontrarPeloEmail(email)) ||
+			(await this.usuarioRepositorio.encontrarPeloFone(fone))) {
+			throw new CustomError(409, 'Usuario já existe');
+		}
+
 		const usuario = await this.usuarioRepositorio.criarUsuario({ nome, sobrenome, email, senha, fone, empresaId });
 
 		return usuario;

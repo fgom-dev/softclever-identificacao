@@ -1,16 +1,46 @@
-import { GerarTokenProvider } from '../../../../providers/GerarTokenProvider';
-import { IIdentificacaoRepositorio, ILoginDTO } from '../../repositorios/IIdentificacaoRepositorio';
+import bcrypt from 'bcrypt';
+
+import { CustomError } from '../../../../Errors/CustomError';
+import { GerarAccessTokenProvider } from '../../../../providers/GerarAccessTokenProvider';
+import { GerarRefreshTokenProvider } from '../../../../providers/GerarRefreshTokenProvider';
+import { PrismaUsuarioRepositorio } from '../../../usuarios/repositorios/implementacoes/PrismaUsuarioRepositorio';
+import { ILoginDTO } from '../../repositorios/IIdentificacaoRepositorio';
+
+interface IRetornoLogin {
+	accessToken: string;
+	refreshToken: string;
+}
 
 export class LoginService {
-	constructor(private identificacaoRepositorio: IIdentificacaoRepositorio) { }
+	async execute({ cnpj, email, senha }: ILoginDTO): Promise<IRetornoLogin> {
+		const usuarioRepositorio = new PrismaUsuarioRepositorio();
 
-	async execute({ cnpj, email, senha }: ILoginDTO): Promise<string> {
-		const login = await this.identificacaoRepositorio.login({ cnpj, email, senha });
+		const usuario = await usuarioRepositorio.encontrarPeloEmail(email);
 
-		const gerarTokenProvider = new GerarTokenProvider();
+		if (!usuario) {
+			throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');
+		}
 
-		const token = gerarTokenProvider.execute(login.usuarioId, login.empresaId);
+		if (cnpj) {
+			if (!usuario.UsuarioEmpresa.find(usuarioEmpresa => usuarioEmpresa.Empresa.cnpj === cnpj)) {
+				throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');
+			}
+		}
 
-		return token;
+		const match = await bcrypt.compare(senha, usuario.senha);
+
+		if (!match) {
+			throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');
+		}
+
+		const gerarAccessTokenProvider = new GerarAccessTokenProvider();
+
+		const accessToken = await gerarAccessTokenProvider.execute(usuario);
+
+		const gerarRefreshTokenProvider = new GerarRefreshTokenProvider();
+
+		// const refreshToken = await gerarRefreshTokenProvider.execute(usuario);
+
+		return { accessToken, refreshToken: '' };
 	}
 }

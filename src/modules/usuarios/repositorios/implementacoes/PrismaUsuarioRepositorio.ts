@@ -1,19 +1,21 @@
-import { PrismaClient, Usuario, Prisma } from '@prisma/client';
+import { Usuario } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { CustomError } from '../../../../Errors/CustomError';
-import { IUsuarioCriacaoDTO, IUsuarioRepositorio, IUsuarioAtualizacaoDTO, IUsuarioParaRetorno } from '../IUsuarioRepositorio';
+import { prisma } from '../../../../prisma/client';
+import { IUsuarioCriacaoDTO, IUsuarioRepositorio, IUsuarioAtualizacaoDTO, IUsuarioDTO } from '../IUsuarioRepositorio';
 
-const prisma = new PrismaClient();
-
-const usuarioParaRetorno = Prisma.validator<Prisma.UsuarioSelect>()({
-	id: true,
-	nome: true,
-	sobrenome: true,
-	email: true
-});
 
 export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
-	listarUsuariosPelaEmpresa(empresaId: number): Promise<IUsuarioParaRetorno[]> {
+	async encontrarPeloFone(fone: string): Promise<Usuario | null> {
+		const usuario = await prisma.usuario.findUnique({
+			where: {
+				fone
+			}
+		});
+
+		return usuario;
+	}
+
+	async listarUsuariosPelaEmpresa(empresaId: number): Promise<Usuario[]> {
 		const usuarios = prisma.usuario.findMany({
 			where: {
 				UsuarioEmpresa: {
@@ -21,101 +23,65 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 						empresaId
 					}
 				}
-			},
-			select: usuarioParaRetorno
+			}
 		});
 
 		return usuarios;
 	}
 
-	async criarUsuario({ nome, sobrenome, email, senha, fone, empresaId }: IUsuarioCriacaoDTO): Promise<IUsuarioParaRetorno> {
-		const usuarioJaExiste = await this.usuarioExiste(email, fone);
+	async criarUsuario({ nome, sobrenome, email, senha, fone, empresaId }: IUsuarioCriacaoDTO): Promise<Usuario> {
 
-		if (usuarioJaExiste) {
-			throw new CustomError(409, 'Usuário já existe');
-		}
-
-		try {
-			const usuario = await prisma.usuario.create({
-				data: {
-					nome,
-					sobrenome,
-					email,
-					senha: await bcrypt.hash(senha, parseInt(process.env.SALT_ROUND as string)),
-					fone,
-					admin: !empresaId,
-					UsuarioEmpresa: {
-						create: {
-							empresaId: empresaId ?? 0
-						}
-					}
-				},
-				select: usuarioParaRetorno
-			});
-
-			return usuario;
-
-		} catch (err) {
-			if (err instanceof Prisma.PrismaClientValidationError) {
-				throw new CustomError(400, 'Bad request');
-			}
-
-			throw err;
-		}
-	}
-
-	async encontrarPeloEmail(email: string): Promise<Usuario> {
-		const usuario = await prisma.usuario.findUnique({
-			where: {
-				email
+		const usuario = await prisma.usuario.create({
+			data: {
+				nome,
+				sobrenome,
+				email,
+				senha: await bcrypt.hash(senha, parseInt(process.env.SALT_ROUND as string)),
+				fone,
+				admin: !empresaId,
 			}
 		});
 
-		if (!usuario) {
-			throw new CustomError(404, 'Usuário não encontrado');
+		if (empresaId) {
+			await prisma.usuarioEmpresa.create({
+				data: {
+					usuarioId: usuario.id,
+					empresaId
+				}
+			});
 		}
 
 		return usuario;
 	}
 
-	async encontrarPeloId(id: number): Promise<Usuario> {
+	async encontrarPeloEmail(email: string): Promise<IUsuarioDTO | null> {
+		const usuario = await prisma.usuario.findUnique({
+			where: {
+				email
+			},
+			include: {
+				UsuarioEmpresa: {
+					include: {
+						Empresa: true
+					}
+				}
+			}
+		});
+
+		return usuario;
+	}
+
+	async encontrarPeloId(id: number): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: {
 				id
 			}
 		});
 
-		if (!usuario) {
-			throw new CustomError(404, 'Usuário não encontrado');
-		}
-
 		return usuario;
 	}
 
-	async usuarioExiste(email?: string, fone?: string): Promise<boolean> {
-		const usuarioCont = await prisma.usuario.count({
-			where: {
-				OR: [
-					{
-						email: {
-							equals: email,
-						}
-					},
-					{
-						fone: {
-							equals: fone,
-						}
-					}
-				]
-			}
-		});
-
-		return usuarioCont > 0;
-	}
-
-	async atualizarUsuario({ id, nome, sobrenome }: IUsuarioAtualizacaoDTO): Promise<IUsuarioParaRetorno> {
-		await this.encontrarPeloId(id);
-
+	async atualizarUsuario({ id, nome, sobrenome }: IUsuarioAtualizacaoDTO): Promise<Usuario> {
 		const usuario = await prisma.usuario.update({
 			where: {
 				id
@@ -124,16 +90,13 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 				nome,
 				sobrenome,
 				dhAtualizacao: new Date(),
-			},
-			select: usuarioParaRetorno
+			}
 		});
 
 		return usuario;
 	}
 
-	async inativarUsuario(id: number): Promise<IUsuarioParaRetorno> {
-		await this.encontrarPeloId(id);
-
+	async inativarUsuario(id: number): Promise<Usuario> {
 		const usuario = await prisma.usuario.update({
 			where: {
 				id,
@@ -141,8 +104,7 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 			data: {
 				situacao: '2',
 				dhAtualizacao: new Date(),
-			},
-			select: usuarioParaRetorno
+			}
 		});
 
 		return usuario;

@@ -1,7 +1,6 @@
-import { Empresa, PrismaClient } from '@prisma/client';
+import { Empresa } from '@prisma/client';
+import { prisma } from '../../../../prisma/client';
 import { IEmpresaCriacaoDTO, IEmpresaRepositorio } from '../IEmpresaRepositorio';
-
-const prisma = new PrismaClient();
 
 export class PrismaEmpresaRepositorio implements IEmpresaRepositorio {
 	async encontrarPeloCnpj(cnpj: string): Promise<Empresa | null> {
@@ -18,6 +17,7 @@ export class PrismaEmpresaRepositorio implements IEmpresaRepositorio {
 		const empresa = await prisma.empresa.create({
 			data: {
 				...novaEmpresa,
+				nomeDoBanco: 'b' + novaEmpresa.cnpj,
 				Enderecos: {
 					createMany: {
 						data: [

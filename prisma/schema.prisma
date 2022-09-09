@@ -39,8 +39,9 @@ model Empresa {
   razaoSocial       String
   fantasia          String?
   regimeTributario  String
-  inscricaoEstadual String
+  inscricaoEstadual String           @unique
   situacao          String?          @default("1")
+  nomeDoBanco       String           @unique
   dhCriacao         DateTime?        @default(now())
   dhAtualizacao     DateTime?        @default(now())
   Enderecos         Endereco[]

@@ -1,13 +1,11 @@
-import { Usuario } from '@prisma/client';
+import { Empresa, Usuario } from '@prisma/client';
 
-export interface IUsuarioParaRetorno {
-	id: number;
-	nome: string;
-	sobrenome: string;
-	email: string;
-	situacao?: string;
-	dhCriacao?: Date;
-	dhAtualizacao?: Date;
+interface IUsuarioEmpresaDTO {
+	Empresa: Empresa
+}
+
+export interface IUsuarioDTO extends Usuario {
+	UsuarioEmpresa: IUsuarioEmpresaDTO[]
 }
 
 export interface IUsuarioCriacaoDTO {
@@ -26,11 +24,11 @@ export interface IUsuarioAtualizacaoDTO {
 }
 
 export interface IUsuarioRepositorio {
-	criarUsuario({ nome, sobrenome, email, senha, fone, empresaId }: IUsuarioCriacaoDTO): Promise<IUsuarioParaRetorno>
-	encontrarPeloEmail(email: string): Promise<Usuario>
-	encontrarPeloId(id: number): Promise<Usuario>
-	usuarioExiste(email?: string, fone?: string): Promise<boolean>
-	atualizarUsuario({ id, nome, sobrenome }: IUsuarioAtualizacaoDTO): Promise<IUsuarioParaRetorno>
-	inativarUsuario(id: number): Promise<IUsuarioParaRetorno>
-	listarUsuariosPelaEmpresa(empresaId: number): Promise<IUsuarioParaRetorno[]>
+	criarUsuario({ nome, sobrenome, email, senha, fone, empresaId }: IUsuarioCriacaoDTO): Promise<Usuario>
+	encontrarPeloEmail(email: string): Promise<IUsuarioDTO | null>
+	encontrarPeloFone(fone: string): Promise<Usuario | null>
+	encontrarPeloId(id: number): Promise<Usuario | null>
+	atualizarUsuario({ id, nome, sobrenome }: IUsuarioAtualizacaoDTO): Promise<Usuario>
+	inativarUsuario(id: number): Promise<Usuario>
+	listarUsuariosPelaEmpresa(empresaId: number): Promise<Usuario[]>
 }
