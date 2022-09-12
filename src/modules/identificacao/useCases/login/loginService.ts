@@ -39,8 +39,8 @@ export class LoginService {
 
 		const gerarRefreshTokenProvider = new GerarRefreshTokenProvider();
 
-		// const refreshToken = await gerarRefreshTokenProvider.execute(usuario);
+		const refreshToken = await gerarRefreshTokenProvider.execute(usuario);
 
-		return { accessToken, refreshToken: '' };
+		return { accessToken, refreshToken };
 	}
 }

@@ -1,11 +1,11 @@
-import { Usuario } from '@prisma/client';
 import { sign } from 'jsonwebtoken';
+import { IUsuarioDTO } from '../modules/usuarios/repositorios/IUsuarioRepositorio';
 
 export class GerarAccessTokenProvider {
-	async execute(usuario: Usuario) {
+	async execute(usuario: IUsuarioDTO) {
+
 		const accessToken = sign({
-			usuarioEmail: usuario.email,
-			empresaCnpj: usuario.UsuarioEmpresa.Empresa.cnpj
+			usuarioEmail: usuario.email
 		}, process.env.SECRET as string, {
 			expiresIn: '30m',
 		});

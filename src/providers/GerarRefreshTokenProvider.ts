@@ -1,9 +1,10 @@
 import { sign } from 'jsonwebtoken';
+import { IUsuarioDTO } from '../modules/usuarios/repositorios/IUsuarioRepositorio';
 
 export class GerarRefreshTokenProvider {
-	async execute(usuarioId: number) {
+	async execute(usuario: IUsuarioDTO) {
 		const refreshToken = sign({
-			usuarioId: usuarioId
+			usuarioEmail: usuario.email
 		}, process.env.SECRET as string, {
 			expiresIn: '30d',
 		});
