@@ -7,12 +7,12 @@ export class LoginController {
 	async handle(req: Request, res: Response) {
 		const { cnpj, email, senha } = req.headers;
 
-		const token = await this.loginService.execute({
+		const tokens = await this.loginService.execute({
 			cnpj: cnpj as string,
 			email: email as string,
 			senha: senha as string,
 		});
 
-		res.status(200).json({ token: token });
+		res.status(200).json(tokens);
 	}
 }

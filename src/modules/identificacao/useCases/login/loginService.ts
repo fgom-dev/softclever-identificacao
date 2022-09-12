@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { CustomError } from '../../../../Errors/CustomError';
 import { GerarAccessTokenProvider } from '../../../../providers/GerarAccessTokenProvider';
 import { GerarRefreshTokenProvider } from '../../../../providers/GerarRefreshTokenProvider';
+import { PrismaEmpresaRepositorio } from '../../../empresas/repositorios/implementacoes/PrismaEmpresaRepositorio';
 import { PrismaUsuarioRepositorio } from '../../../usuarios/repositorios/implementacoes/PrismaUsuarioRepositorio';
 import { ILoginDTO } from '../../repositorios/IIdentificacaoRepositorio';
 
@@ -21,8 +22,18 @@ export class LoginService {
 			throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');
 		}
 
+		let empresa;
+
 		if (cnpj) {
 			if (!usuario.UsuarioEmpresa.find(usuarioEmpresa => usuarioEmpresa.Empresa.cnpj === cnpj)) {
+				throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');
+			}
+
+			const empresaRepositorio = new PrismaEmpresaRepositorio();
+
+			empresa = await empresaRepositorio.encontrarPeloCnpj(cnpj);
+
+			if (!empresa) {
 				throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');
 			}
 		}
@@ -35,11 +46,11 @@ export class LoginService {
 
 		const gerarAccessTokenProvider = new GerarAccessTokenProvider();
 
-		const accessToken = await gerarAccessTokenProvider.execute(usuario);
+		const accessToken = await gerarAccessTokenProvider.execute(usuario, empresa);
 
 		const gerarRefreshTokenProvider = new GerarRefreshTokenProvider();
 
-		const refreshToken = await gerarRefreshTokenProvider.execute(usuario);
+		const refreshToken = await gerarRefreshTokenProvider.execute(usuario, empresa);
 
 		return { accessToken, refreshToken };
 	}

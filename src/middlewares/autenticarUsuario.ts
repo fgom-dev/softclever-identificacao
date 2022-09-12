@@ -19,7 +19,7 @@ export function autenticarUsuario(req: Request, res: Response, next: NextFunctio
 
 		const payload = jwt.payload as JwtPayload;
 
-		res.set({ usuarioId: payload.usuarioId, empresaId: payload.empresaId });
+		res.set({ usuarioEmail: payload.usuarioEmail, empresaCnpj: payload.empresaCnpj });
 
 		return next();
 	} catch (err) {

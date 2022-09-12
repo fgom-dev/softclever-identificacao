@@ -4,13 +4,19 @@ import { IUsuarioRepositorio, IUsuarioAtualizacaoDTO } from '../../repositorios/
 export class AtualizarUsuarioService {
 	constructor(private usuarioRepositorio: IUsuarioRepositorio) { }
 
-	async execute({ id, nome, sobrenome }: IUsuarioAtualizacaoDTO) {
-		if (!await this.usuarioRepositorio.encontrarPeloId(id)) {
+	async execute({ id, email, nome, sobrenome }: IUsuarioAtualizacaoDTO) {
+		const usuario = await this.usuarioRepositorio.encontrarPeloId(id);
+
+		if (!usuario) {
 			throw new CustomError(404, 'Usuário não encontrado');
 		}
 
-		const usuario = await this.usuarioRepositorio.atualizarUsuario({ id, nome, sobrenome });
+		if (usuario.email !== email) {
+			throw new CustomError(400, 'Não autorizado');
+		}
 
-		return usuario;
+		const usuarioAtualizado = await this.usuarioRepositorio.atualizarUsuario({ id, email, nome, sobrenome });
+
+		return usuarioAtualizado;
 	}
 }

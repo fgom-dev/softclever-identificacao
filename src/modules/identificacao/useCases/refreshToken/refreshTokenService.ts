@@ -2,6 +2,7 @@ import { JwtPayload, verify } from 'jsonwebtoken';
 import { CustomError } from '../../../../Errors/CustomError';
 import { GerarAccessTokenProvider } from '../../../../providers/GerarAccessTokenProvider';
 import { GerarRefreshTokenProvider } from '../../../../providers/GerarRefreshTokenProvider';
+import { PrismaEmpresaRepositorio } from '../../../empresas/repositorios/implementacoes/PrismaEmpresaRepositorio';
 import { PrismaUsuarioRepositorio } from '../../../usuarios/repositorios/implementacoes/PrismaUsuarioRepositorio';
 
 interface IRetornoToken {
@@ -12,11 +13,15 @@ interface IRetornoToken {
 export class RefreshTokenService {
 	async execute(refreshToken: string): Promise<IRetornoToken> {
 
-		const jwt = verify(refreshToken, process.env.SECRET as string, {
-			complete: true
-		});
+		const [, token] = refreshToken.split(' ');
 
-		if (!jwt) {
+		let jwt;
+
+		try {
+			jwt = verify(token, process.env.SECRET as string, {
+				complete: true
+			});
+		} catch (err) {
 			throw new CustomError(403, 'Token inválido');
 		}
 
@@ -30,13 +35,25 @@ export class RefreshTokenService {
 			throw new CustomError(403, 'Token inválido');
 		}
 
+		let empresa;
+
+		if (payload.cnpj) {
+			const empresaRepositorio = new PrismaEmpresaRepositorio();
+
+			empresa = await empresaRepositorio.encontrarPeloCnpj(payload.cnpj);
+
+			if (!empresa) {
+				throw new CustomError(403, 'Token inválido');
+			}
+		}
+
 		const gerarAccessTokenProvider = new GerarAccessTokenProvider();
 
-		const accessToken = await gerarAccessTokenProvider.execute(usuario);
+		const accessToken = await gerarAccessTokenProvider.execute(usuario, empresa);
 
 		const gerarRefreshTokenProvider = new GerarRefreshTokenProvider();
 
-		const newRefreshToken = await gerarRefreshTokenProvider.execute(usuario);
+		const newRefreshToken = await gerarRefreshTokenProvider.execute(usuario, empresa);
 
 		return { accessToken, refreshToken: newRefreshToken };
 

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { CustomError } from '../../../../Errors/CustomError';
 import { InativarUsuarioService } from './inativarUsuarioService';
 
 export class InativarUsuarioController {
@@ -8,14 +7,10 @@ export class InativarUsuarioController {
 	async handle(req: Request, res: Response) {
 		const { id } = req.params;
 
-		const usuarioId = res.get('usuarioId') as string;
+		const usuarioEmail = res.get('usuarioEmail') as string;
 
-		if (usuarioId !== id) {
-			throw new CustomError(401, 'Não autorizado');
-		}
+		const usuario = await this.inativarUsuarioService.execute(parseInt(id), usuarioEmail);
 
-		const user = await this.inativarUsuarioService.execute(parseInt(id));
-
-		return res.status(200).json(user);
+		return res.status(200).json(usuario);
 	}
 }

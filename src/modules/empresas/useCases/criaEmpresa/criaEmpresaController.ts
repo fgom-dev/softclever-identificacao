@@ -10,9 +10,9 @@ export class CriaEmpresaController {
 			...req.body,
 		};
 
-		const usuarioId = parseInt(res.get('usuarioId') as string);
+		const usuarioEmail = res.get('usuarioEmail') as string;
 
-		const empresa = await this.criaEmpresaService.execute(novaEmpresa, usuarioId);
+		const empresa = await this.criaEmpresaService.execute(novaEmpresa, usuarioEmail);
 
 		return res.status(201).json(empresa);
 	}

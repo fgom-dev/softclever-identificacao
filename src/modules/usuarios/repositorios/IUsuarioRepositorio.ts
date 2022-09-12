@@ -19,6 +19,7 @@ export interface IUsuarioCriacaoDTO {
 
 export interface IUsuarioAtualizacaoDTO {
 	id: number;
+	email: string;
 	nome: string;
 	sobrenome: string;
 }
