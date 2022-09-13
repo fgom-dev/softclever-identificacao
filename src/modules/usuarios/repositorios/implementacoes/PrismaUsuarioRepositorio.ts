@@ -1,14 +1,44 @@
 import { Usuario } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { prisma } from '../../../../prisma/client';
-import { IUsuarioCriacaoDTO, IUsuarioRepositorio, IUsuarioAtualizacaoDTO, IUsuarioDTO } from '../IUsuarioRepositorio';
+import { IUsuarioCriacaoDTO, IUsuarioRepositorio, IUsuarioAtualizacaoDTO, IUsuarioRetorno, IUsuarioDTO } from '../IUsuarioRepositorio';
 
 
 export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
-	async encontrarPeloFone(fone: string): Promise<Usuario | null> {
+	async reativarUsuario(id: number): Promise<Usuario> {
+		const usuario = await prisma.usuario.update({
+			where: {
+				id,
+			},
+			data: {
+				situacao: '1',
+				dhAtualizacao: new Date(),
+			}
+		});
+
+		return usuario;
+	}
+
+	async encontrarPeloFone(fone: string): Promise<IUsuarioRetorno | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: {
 				fone
+			},
+			select: {
+				id: true,
+				nome: true,
+				sobrenome: true,
+				email: true,
+				fone: true,
+				admin: true,
+				situacao: true,
+				dhCriacao: true,
+				dhAtualizacao: true,
+				UsuarioEmpresa: {
+					select: {
+						Empresa: true
+					}
+				}
 			}
 		});
 
@@ -59,9 +89,19 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 			where: {
 				email
 			},
-			include: {
+			select: {
+				id: true,
+				nome: true,
+				sobrenome: true,
+				email: true,
+				senha: true,
+				fone: true,
+				admin: true,
+				situacao: true,
+				dhCriacao: true,
+				dhAtualizacao: true,
 				UsuarioEmpresa: {
-					include: {
+					select: {
 						Empresa: true
 					}
 				}
@@ -71,10 +111,26 @@ export class PrismaUsuarioRepositorio implements IUsuarioRepositorio {
 		return usuario;
 	}
 
-	async encontrarPeloId(id: number): Promise<Usuario | null> {
+	async encontrarPeloId(id: number): Promise<IUsuarioRetorno | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: {
 				id
+			},
+			select: {
+				id: true,
+				nome: true,
+				sobrenome: true,
+				email: true,
+				fone: true,
+				admin: true,
+				situacao: true,
+				dhCriacao: true,
+				dhAtualizacao: true,
+				UsuarioEmpresa: {
+					select: {
+						Empresa: true
+					}
+				}
 			}
 		});
 

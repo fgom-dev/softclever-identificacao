@@ -4,8 +4,21 @@ interface IUsuarioEmpresaDTO {
 	Empresa: Empresa
 }
 
+export interface IUsuarioRetorno {
+	id: number;
+	nome: string;
+	sobrenome: string;
+	email: string;
+	fone: string;
+	admin: boolean;
+	situacao: string | null;
+	dhCriacao: Date | null;
+	dhAtualizacao: Date | null;
+	UsuarioEmpresa: IUsuarioEmpresaDTO[];
+}
+
 export interface IUsuarioDTO extends Usuario {
-	UsuarioEmpresa: IUsuarioEmpresaDTO[]
+	UsuarioEmpresa: IUsuarioEmpresaDTO[];
 }
 
 export interface IUsuarioCriacaoDTO {
@@ -27,9 +40,10 @@ export interface IUsuarioAtualizacaoDTO {
 export interface IUsuarioRepositorio {
 	criarUsuario({ nome, sobrenome, email, senha, fone, empresaId }: IUsuarioCriacaoDTO): Promise<Usuario>
 	encontrarPeloEmail(email: string): Promise<IUsuarioDTO | null>
-	encontrarPeloFone(fone: string): Promise<Usuario | null>
-	encontrarPeloId(id: number): Promise<Usuario | null>
+	encontrarPeloFone(fone: string): Promise<IUsuarioRetorno | null>
+	encontrarPeloId(id: number): Promise<IUsuarioRetorno | null>
 	atualizarUsuario({ id, nome, sobrenome }: IUsuarioAtualizacaoDTO): Promise<Usuario>
 	inativarUsuario(id: number): Promise<Usuario>
+	reativarUsuario(id: number): Promise<Usuario>
 	listarUsuariosPelaEmpresa(empresaId: number): Promise<Usuario[]>
 }

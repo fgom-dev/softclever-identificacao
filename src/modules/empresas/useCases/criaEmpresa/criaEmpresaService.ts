@@ -13,7 +13,13 @@ export class CriaEmpresaService {
 			throw new CustomError(400, 'CNPJ inválido');
 		}
 
-		const empresaExists = await this.empresaRepositorio.encontrarPeloCnpj(novaEmpresa.cnpj);
+		let empresaExists = await this.empresaRepositorio.encontrarPeloCnpj(novaEmpresa.cnpj);
+
+		if (empresaExists) {
+			throw new CustomError(400, 'Empresa já existe');
+		}
+
+		empresaExists = await this.empresaRepositorio.encontrarPelaInscEstadual(novaEmpresa.inscricaoEstadual);
 
 		if (empresaExists) {
 			throw new CustomError(400, 'Empresa já existe');

@@ -38,7 +38,7 @@ export class LoginService {
 			}
 		}
 
-		const match = await bcrypt.compare(senha, usuario.senha);
+		const match = await bcrypt.compare(senha, usuario.senha as string);
 
 		if (!match) {
 			throw new CustomError(400, 'CNPJ, Email ou Senha incorretos');

@@ -3,6 +3,16 @@ import { prisma } from '../../../../prisma/client';
 import { IEmpresaCriacaoDTO, IEmpresaRepositorio } from '../IEmpresaRepositorio';
 
 export class PrismaEmpresaRepositorio implements IEmpresaRepositorio {
+	async encontrarPelaInscEstadual(inscricaoEstadual: string): Promise<Empresa | null> {
+		const empresa = await prisma.empresa.findUnique({
+			where: {
+				inscricaoEstadual
+			}
+		});
+
+		return empresa;
+	}
+
 	async encontrarPeloCnpj(cnpj: string): Promise<Empresa | null> {
 		const empresa = await prisma.empresa.findUnique({
 			where: {
