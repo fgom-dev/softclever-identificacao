@@ -7,7 +7,8 @@ export class GerarAccessTokenProvider {
 
 		const accessToken = sign({
 			usuarioEmail: usuario.email,
-			empresaCnpj: empresa?.cnpj
+			empresaCnpj: empresa?.cnpj,
+			nomeBanco: empresa?.nomeDoBanco
 		}, process.env.SECRET as string, {
 			expiresIn: '1h',
 		});

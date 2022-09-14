@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { autenticarRoutes } from './autenticar.routes';
 import { empresasRoutes } from './empresas.routes';
 import { loginRoutes } from './login.routes';
 import { refreshTokenRoutes } from './refreshToken.routes';
@@ -10,3 +11,4 @@ router.use('/usuarios', usuariosRoutes);
 router.use('/login', loginRoutes);
 router.use('/empresas', empresasRoutes);
 router.use('/refresh-token', refreshTokenRoutes);
+router.use('/autenticar', autenticarRoutes);
