@@ -1,0 +1,31 @@
+services:
+  database_softclever:
+    image: mysql
+    container_name: database_softclever
+    restart: always
+    env_file: .env    
+    environment:
+      MYSQL_DATABASE: 'softclever'
+      MYSQL_ROOT_PASSWORD: "soft@1973824650"
+      MYSQL_USER: "softclever"
+      MYSQL_PASSWORD: "soft@1973"
+    ports:
+      - '3306'
+    expose:
+      - '3306'
+    volumes:
+      - my-db:/data/mysql        
+  
+  api_identificacao:
+    build: .      
+    container_name: api_identificacao
+    ports:
+      - '3000'
+    volumes:
+      - .:/usr/api_identificacao
+    depends_on:
+      - database_softclever    
+
+volumes:
+  my-db:
+    driver: local
